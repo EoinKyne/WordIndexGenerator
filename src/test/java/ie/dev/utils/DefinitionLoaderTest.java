@@ -6,6 +6,8 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class DefinitionLoaderTest {
     DefinitionsLoader loader;
     @Test
@@ -16,5 +18,6 @@ public class DefinitionLoaderTest {
 
 
         Map<String, List<String>> result = loader.load(new StringReader(csv));
+        assertTrue(result.containsKey("a"));
     }
 }

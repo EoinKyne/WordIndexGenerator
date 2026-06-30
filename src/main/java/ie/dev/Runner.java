@@ -1,5 +1,6 @@
 package ie.dev;
 
+import ie.dev.service.WordIndexGeneratorMenu;
 import ie.dev.utils.DefinitionsLoader;
 import ie.dev.utils.IgnoreWordsLoader;
 import org.slf4j.Logger;
@@ -32,6 +33,9 @@ public class Runner {
         }catch (Exception e){
             LOGGER.error(e.getMessage());
         }
+
+        WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu();
+        menu.start();
         //System.out.println(ignoreWords);
         //System.out.println(definitions.get("a"));
     }
