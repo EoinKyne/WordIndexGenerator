@@ -1,4 +1,6 @@
 name: CI
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   workflow_dispatch:
@@ -15,7 +17,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'termurin'
+          distribution: 'temurin'
           cache: maven
       - name: Execute test
         run: mvn test
