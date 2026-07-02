@@ -49,22 +49,17 @@ public class GenerateIndex {
         return bookIndex;
     }
 
-
     public String[] tokenizeLine(String line){
         LOGGER.debug("Tokenizing line: ");
         return line.replaceAll("[^a-zA-Z]", " ")
                 .toLowerCase().split("\\s+");
     }
 
-
     public Word createWordEntry(String text){
         LOGGER.debug("Create word entry... ");
         List<String> definition = definitions.getOrDefault(text, List.of("No definition found"));
         return new Word(text, definition);
     }
-
-
-
 
     public int updatePageCounter(int lineCount, int pageCount){
         LOGGER.debug("Updating page counter...");
