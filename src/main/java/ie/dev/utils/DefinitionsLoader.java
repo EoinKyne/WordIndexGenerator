@@ -15,7 +15,7 @@ public class DefinitionsLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefinitionsLoader.class);
 
-    private DefinitionsLoader(){
+    public DefinitionsLoader(){
 
     }
 
@@ -34,7 +34,7 @@ public class DefinitionsLoader {
                 .collect(Collectors.groupingBy(
                         record -> record.get(0).toLowerCase(), TreeMap::new,
                         Collectors.mapping(
-                                record -> record.get(1).toLowerCase() + ":\t" + record.get(2).toLowerCase(),
+                                record -> record.get(1).toLowerCase() + "\t" + record.get(2).toLowerCase()+"\n",
                                 Collectors.toList()
                         )
                 ));

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public final class IgnoreWordsLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreWordsLoader.class);
-    private IgnoreWordsLoader(){
+    public IgnoreWordsLoader(){
 
     }
 
