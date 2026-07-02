@@ -1,22 +1,29 @@
 package ie.dev.service;
 
+import ie.dev.model.Word;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class WordIndexGeneratorMenuTest {
 
-    WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu();
+    Map<String, Word> bookIndex = Map.of(
+            "java", new Word("java", List.of("A programming language"), Set.of(1, 3)),
+            "python", new Word("python", List.of("Another programming language"), Set.of(2,4))
+    );
+
+    WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu(new Scanner(System.in));
     @TempDir
     Path tempDir;
     @Test
@@ -65,17 +72,42 @@ public class WordIndexGeneratorMenuTest {
     }
 
     @Test
-    void shouldSetKeepRunningToFalseWhenOptionIsFour(){
+    void shouldSetKeepRunningToFalseWhenOptionIsFour() throws IOException{
         int option = 4;
         wordIndexGeneratorMenu.handleOption(option);
         assertFalse(wordIndexGeneratorMenu.isRunning());
     }
 
     @Test
-    void shouldReturnStringInvalidForAnyOtherKey(){
+    void shouldReturnStringInvalidForAnyOtherKey() throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         System.setOut(new PrintStream(output));
         wordIndexGeneratorMenu.handleOption(99);
         assertTrue(output.toString().contains("Invalid option"));
+    }
+
+    @Test
+    void shouldReturnTheBookPath() throws IOException {
+        InputStream originalIn = System.in;
+        try {
+            String book = "book1.txt";
+            System.setIn(new ByteArrayInputStream(book.getBytes()));
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
+            String result = menu.getBookPath();
+
+            assertEquals("book1.txt", result);
+        }
+        finally {
+            System.setIn(originalIn);
+        }
+    }
+
+    @Test
+    void shouldPrintMapToConsole() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+        wordIndexGeneratorMenu.printIndexToConsole(bookIndex);
+        assertTrue(output.toString().contains("java"));
+        assertFalse(output.toString().contains("bash"));
     }
 }

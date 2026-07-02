@@ -15,31 +15,22 @@ import java.io.Reader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 public class Runner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Runner.class);
 
-    private static Set<String> ignoreWords;
-    private static Map<String, List<String>> definitions;
-
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         LOGGER.info("Startup...");
-        Reader reader = new BufferedReader(new InputStreamReader(
-                DefinitionsLoader.class.getResourceAsStream("/templates/dictionary.csv")
-        ));
-        ignoreWords = IgnoreWordsLoader.load();
-        definitions = DefinitionsLoader.load(reader);
-        GenerateIndex indexGenerator = new GenerateIndex(ignoreWords, definitions);
         try {
-            for (Map.Entry<String, Word> entry : indexGenerator.generateIndex(Path.of("library/WarAndPeace-Tolstoy.txt"))
-             .entrySet()) {
-                System.out.println(entry.getKey() + "\n" + entry.getValue());
-
-            }
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
+            menu.start();
         }catch (IOException e){
-            LOGGER.error(e.getMessage());
+            LOGGER.error("IOException occurred: {}", e.getMessage());
+        }catch (Exception e){
+            LOGGER.error("Exception occurred: {}", e.getMessage());
         }
     }
 }
