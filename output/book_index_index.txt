@@ -1,0 +1,4 @@
+Word			Details
+JavaScript      Definition
+				[A programming language, A core technology of the Web]
+				Page Nos [1, 2, 3]

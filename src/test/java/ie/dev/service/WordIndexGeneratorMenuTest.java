@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WordIndexGeneratorMenuTest {
 
-    
+
 
     WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu(new Scanner(System.in));
     @TempDir
