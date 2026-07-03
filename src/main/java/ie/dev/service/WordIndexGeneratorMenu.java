@@ -6,10 +6,7 @@ import ie.dev.utils.IgnoreWordsLoader;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -75,9 +72,9 @@ public final class WordIndexGeneratorMenu {
         definitions = DefinitionsLoader.load(reader);
     }
 
-    public Map<String, Word> generateIndex(String bookPath) throws IOException {
+    public Map<String, Word> generateIndex(Path bookPath) throws IOException {
         GenerateIndex indexGenerator = new GenerateIndex(ignoreWords, definitions);
-        return indexGenerator.generateIndex(Path.of(bookPath));
+        return indexGenerator.generateIndex(bookPath);
     }
 
     public void handleOption(int option) throws IOException{
@@ -92,20 +89,21 @@ public final class WordIndexGeneratorMenu {
 
     public void printIndex() throws IOException {
         LOGGER.info("print index");
-        String bookPath = getBookPath();
+        Path bookPath = getBookPath();
         printIndexToConsole(generateIndex(bookPath));
     }
 
     public void saveIndex() throws IOException{
-        LOGGER.info("saving index");
-        String bookPath = getBookPath();
-        generateIndex(bookPath);
+        LOGGER.info("Saving index");
+        Path bookPath = getBookPath();
+        saveIndexToFile(generateIndex(bookPath), bookPath);
     }
 
     public void searchIndex() throws IOException{
         LOGGER.info("searching index");
-        String bookPath = getBookPath();
+        Path bookPath = getBookPath();
         generateIndex(bookPath);
+
     }
 
     public List<Path> listBooks(Path library) throws IOException {
@@ -119,17 +117,40 @@ public final class WordIndexGeneratorMenu {
         return keepRunning;
     }
 
-    public String getBookPath() throws IOException{
+    public Path getBookPath() throws IOException{
         LOGGER.info("Getting book path...");
         System.out.println(listBooks(libraryPath));
         System.out.println("Enter path and name of book to create index for: ");
         String bookPath = scanner.next();
-        return bookPath;
+        return Path.of(bookPath);
     }
     public void printIndexToConsole(Map<String, Word> bookIndex){
         LOGGER.info("Printing index to console...");
         for (Map.Entry<String, Word> entry : bookIndex.entrySet()) {
             System.out.println(entry.getKey() + "\n" + entry.getValue());
         }
+    }
+
+    public void saveIndexToFile(Map<String, Word> bookIndex, Path bookPath) throws IOException {
+        LOGGER.info("Saving index to file...");
+        //Path inputPath = Path.of(bookPath);
+        Path outputFile = Path.of("output",bookPath.getFileName().toString().replace(".txt", "_index.txt"));
+
+        try(BufferedWriter writer = Files.newBufferedWriter(outputFile))
+            {
+            writer.write("Word\t\t\tDetails");
+            writer.newLine();
+
+            for(Map.Entry<String, Word> entry : bookIndex.entrySet()){
+                writer.write("""
+                                     %-15s Definition%n\t\t\t\t%s%n\t\t\t\tPage Nos %s%n"""
+                                     .formatted(
+                                             entry.getKey(),
+                                             entry.getValue().definitions(),
+                                             entry.getValue().pageNumbers()));
+            }
+
+        }
+        LOGGER.info("\nIndex saved to file: {}", outputFile.toAbsolutePath());
     }
 }
