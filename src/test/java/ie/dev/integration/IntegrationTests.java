@@ -15,8 +15,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class IntegrationTests {
 
@@ -79,5 +78,26 @@ public class IntegrationTests {
         String content = Files.readString(expected);
         assertTrue(content.contains("programming language"));
         assertTrue(content.contains("core technology of the Web"));
+    }
+
+    @Test
+    void shouldSearchIndexForWord() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+        String word = "java";
+
+        wordIndexGeneratorMenu.searchIndexForWord(bookIndex, word);
+        assertTrue(output.toString().contains("java"));
+        assertFalse(output.toString().contains("bash"));
+    }
+
+    @Test
+    void shouldSearchIndexForWordNotFound() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+        String word = "Perl";
+
+        wordIndexGeneratorMenu.searchIndexForWord(bookIndex, word);
+        assertTrue(output.toString().contains("word is not in the index"));
     }
 }

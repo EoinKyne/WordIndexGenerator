@@ -102,8 +102,8 @@ public final class WordIndexGeneratorMenu {
     public void searchIndex() throws IOException{
         LOGGER.info("searching index");
         Path bookPath = getBookPath();
-        generateIndex(bookPath);
-
+        String word = getWord();
+        searchIndexForWord(generateIndex(bookPath), word);
     }
 
     public List<Path> listBooks(Path library) throws IOException {
@@ -152,5 +152,30 @@ public final class WordIndexGeneratorMenu {
 
         }
         LOGGER.info("\nIndex saved to file: {}", outputFile.toAbsolutePath());
+    }
+
+    public void searchIndexForWord(Map<String, Word> bookIndex, String word){
+        LOGGER.info("Searching index for word...");
+        Word entry = bookIndex.get(word);
+        if (entry == null){
+            LOGGER.info("Word not found in index: {}", word);
+            System.out.println("Your word is not in the index");
+            return;
+        }
+        System.out.println("Word\t\t\t\tDetails");
+        System.out.printf(
+                "%-15s Definition%n\t\t\t\t%s%n\t\t\t\tPage Nos %s%n",
+                word,
+                entry.definitions(),
+                entry.pageNumbers()
+        );
+
+    }
+
+    public String getWord(){
+        LOGGER.info("Get word to search...");
+        System.out.println("Enter the word to search for: ");
+        String word = scanner.next();
+        return word;
     }
 }
