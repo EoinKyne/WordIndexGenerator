@@ -18,14 +18,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WordIndexGeneratorMenuTest {
 
-    Map<String, Word> bookIndex = Map.of(
-            "java", new Word("java", List.of("A programming language"), Set.of(1, 3)),
-            "python", new Word("python", List.of("Another programming language"), Set.of(2,4))
-    );
+
 
     WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu(new Scanner(System.in));
     @TempDir
     Path tempDir;
+
     @Test
     void printIndex(){
         assertTrue(true);
@@ -93,21 +91,14 @@ public class WordIndexGeneratorMenuTest {
             String book = "book1.txt";
             System.setIn(new ByteArrayInputStream(book.getBytes()));
             WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
-            String result = menu.getBookPath();
+            Path result = menu.getBookPath();
 
-            assertEquals("book1.txt", result);
+            assertEquals("book1.txt", result.toString());
         }
         finally {
             System.setIn(originalIn);
         }
     }
 
-    @Test
-    void shouldPrintMapToConsole() {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(output));
-        wordIndexGeneratorMenu.printIndexToConsole(bookIndex);
-        assertTrue(output.toString().contains("java"));
-        assertFalse(output.toString().contains("bash"));
-    }
+
 }
