@@ -54,21 +54,6 @@ public class WordIndexGeneratorMenuTest {
                      () -> wordIndexGeneratorMenu.listBooks(invalidPath));
     }
 
-    @Disabled
-    void shouldPrintIndexWhenOptionIsOne(){
-
-    }
-
-    @Disabled
-    void shouldSaveIndexWhenOptionIsTwo(){
-
-    }
-
-    @Disabled
-    void shouldSearchIndexWhenOptionIsThree(){
-
-    }
-
     @Test
     void shouldSetKeepRunningToFalseWhenOptionIsFour() throws IOException{
         int option = 4;
@@ -100,5 +85,18 @@ public class WordIndexGeneratorMenuTest {
         }
     }
 
+    @Test
+    void shouldReturnWordToSeach(){
+        InputStream originalIn = System.in;
 
+        try {
+            String word = "java";
+            System.setIn(new ByteArrayInputStream(word.getBytes()));
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
+            String result = menu.getWord();
+            assertEquals("java", result.toString());
+        }finally {
+            System.setIn(originalIn);
+        }
+    }
 }
