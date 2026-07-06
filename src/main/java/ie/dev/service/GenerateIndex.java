@@ -7,22 +7,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class GenerateIndex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateIndex.class);
-    private final Set<String> ignoreWords;
-    private final Map<String, List<String>> definitions;
+    private final IgnoreWordsLoader ignoreWordsLoader = new IgnoreWordsLoader();
+    private Set<String> ignoreWords;
+    private final DefinitionsLoader definitionsLoader = new DefinitionsLoader();
+    private Map<String, List<String>> definitions;
+
+    public GenerateIndex(){}
 
     public GenerateIndex(Set<String> ignoreWords, Map<String, List<String>> definitions) {
         LOGGER.info("Starting generate index...");
         this.ignoreWords = Set.copyOf(ignoreWords);
         this.definitions = Map.copyOf(definitions);
+    }
+
+    public void loadIgnoreWords() throws IOException {
+        ignoreWords = ignoreWordsLoader.load();
+    }
+
+    public void loadDefinitions() throws Exception {
+        Reader reader = new BufferedReader(new InputStreamReader(
+                DefinitionsLoader.class.getResourceAsStream("/templates/dictionary.csv")
+        ));
+        definitions = definitionsLoader.load(reader);
     }
     public Map<String, Word> generateIndex(Path book) throws IOException {
         LOGGER.info("Generating index for book...");
@@ -38,11 +52,10 @@ public class GenerateIndex {
                 pageCount = updatePageCounter(lineCount, pageCount);
 
                 for (String word : tokenizeLine(line)) {
-                    if (ignoreWords.contains(word)) {
-                        continue;
+                    if (!ignoreWords.contains(word)) {
+                        Word entry = bookIndex.computeIfAbsent(word, w -> createWordEntry(w));
+                        entry.addPageNumber(pageCount);
                     }
-                    Word entry = bookIndex.computeIfAbsent(word, w -> createWordEntry(w));
-                    entry.addPageNumber(pageCount);
                 }
             }
         }

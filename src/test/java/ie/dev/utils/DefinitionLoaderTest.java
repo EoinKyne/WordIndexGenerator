@@ -9,7 +9,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefinitionLoaderTest {
-    DefinitionsLoader loader;
+    DefinitionsLoader loader = new DefinitionsLoader();
     @Test
     void loadsSingleWordCorrectly() throws Exception {
         String csv = "\"word\",\"wordtype\",\"definition\"\n" +

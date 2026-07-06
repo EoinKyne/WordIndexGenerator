@@ -1,9 +1,12 @@
 package ie.dev.service;
 
 import ie.dev.model.Word;
+import ie.dev.utils.DefinitionsLoader;
+import ie.dev.utils.IgnoreWordsLoader;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -18,17 +21,39 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WordIndexGeneratorMenuTest {
 
-
-
-    WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu(new Scanner(System.in));
+    WordIndexGeneratorMenu wordIndexGeneratorMenu = new WordIndexGeneratorMenu(new Scanner(System.in), new GenerateIndex());
     @TempDir
     Path tempDir;
 
     @Test
-    void printIndex(){
-        assertTrue(true);
+    void shouldPrintMenu(){
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+        wordIndexGeneratorMenu.print();
+        assertTrue(output.toString().contains("Index Generator"));
+        assertTrue(output.toString().contains("print to console"));
+        assertTrue(output.toString().contains("print index to file"));
+        assertTrue(output.toString().contains("definition by word"));
+        assertTrue(output.toString().contains("Exit"));
     }
 
+    @Test
+    void shouldGenerateIndexForBook() throws Exception {
+        // Create a temporary book file
+        Path bookPath = tempDir.resolve("book.txt");
+        Files.writeString(bookPath, "This is a test book. This book is for testing.");
+
+        // Load ignore words and definitions
+        wordIndexGeneratorMenu.initialize();
+
+        // Generate index
+        Map<String, Word> index = wordIndexGeneratorMenu.generateIndex(bookPath);
+
+        // Verify that the index contains expected words
+        assertTrue(index.containsKey("test"));
+        assertTrue(index.containsKey("book"));
+        assertFalse(index.containsKey("is")); // Assuming "is" is in ignore words
+    }
     @Test
     void shouldReturnAllBooks() throws IOException {
         Files.createFile(tempDir.resolve("book1.txt"));
@@ -55,6 +80,14 @@ public class WordIndexGeneratorMenuTest {
     }
 
     @Test
+    void shouldExitWhenOptionIsFour() throws IOException {
+        Scanner scanner = new Scanner("4\n");
+        WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(scanner, new GenerateIndex());
+        assertDoesNotThrow(menu::runMenuLoop);
+    }
+
+
+    @Test
     void shouldSetKeepRunningToFalseWhenOptionIsFour() throws IOException{
         int option = 4;
         wordIndexGeneratorMenu.handleOption(option);
@@ -69,13 +102,14 @@ public class WordIndexGeneratorMenuTest {
         assertTrue(output.toString().contains("Invalid option"));
     }
 
+
     @Test
     void shouldReturnTheBookPath() throws IOException {
         InputStream originalIn = System.in;
         try {
             String book = "book1.txt";
             System.setIn(new ByteArrayInputStream(book.getBytes()));
-            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in), new GenerateIndex());
             Path result = menu.getBookPath();
 
             assertEquals("book1.txt", result.toString());
@@ -86,13 +120,13 @@ public class WordIndexGeneratorMenuTest {
     }
 
     @Test
-    void shouldReturnWordToSeach(){
+    void shouldReturnWordToSearch(){
         InputStream originalIn = System.in;
 
         try {
             String word = "java";
             System.setIn(new ByteArrayInputStream(word.getBytes()));
-            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in));
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in), new GenerateIndex());
             String result = menu.getWord();
             assertEquals("java", result.toString());
         }finally {

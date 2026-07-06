@@ -1,6 +1,8 @@
 package ie.dev.service;
 
 import ie.dev.model.Word;
+import ie.dev.utils.DefinitionsLoader;
+import ie.dev.utils.IgnoreWordsLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GenerateIndexTest {
 
-    Set<String> ignoreWords = Set.of("the", "and");
+    private IgnoreWordsLoader ignoreWordsLoader = new IgnoreWordsLoader();
+    private DefinitionsLoader definitionsloader = new DefinitionsLoader();
+    private Set<String> ignoreWords = Set.of("the", "and");
 
     Map<String, List<String>> definitions = Map.of(
             "java", List.of("A programming language"),

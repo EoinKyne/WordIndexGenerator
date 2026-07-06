@@ -19,7 +19,7 @@ public class DefinitionsLoader {
 
     }
 
-    public static Map<String, List<String>> load(Reader reader) throws Exception {
+    public Map<String, List<String>> load(Reader reader) throws Exception {
         LOGGER.info("Loading definitions...");
 
         CSVParser parser = CSVFormat.DEFAULT

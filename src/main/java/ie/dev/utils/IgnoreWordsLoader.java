@@ -18,7 +18,7 @@ public final class IgnoreWordsLoader {
 
     }
 
-    public static Set<String> load() throws IOException {
+    public Set<String> load() throws IOException {
         LOGGER.info("Loading ignorewords...");
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(

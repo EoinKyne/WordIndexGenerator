@@ -19,19 +19,22 @@ import java.util.stream.Stream;
 public final class WordIndexGeneratorMenu {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WordIndexGeneratorMenu.class);
-    private static boolean keepRunning = true;
+    private boolean keepRunning = true;
     private final Scanner scanner;
 
-    private static Path libraryPath = Path.of("library");
+    private Path libraryPath = Path.of("library");
 
-    private static Set<String> ignoreWords;
-    private static Map<String, List<String>> definitions;
+    private Set<String> ignoreWords;
+    private Map<String, List<String>> definitions;
+    private final GenerateIndex indexGenerator;
 
-    public WordIndexGeneratorMenu(Scanner scanner){
+
+    public WordIndexGeneratorMenu(Scanner scanner, GenerateIndex indexGenerator){
         this.scanner = scanner;
+        this.indexGenerator = indexGenerator;
     }
 
-    public static void print(){
+    public void print(){
         System.out.println(
         """
         ____________________________________
@@ -41,7 +44,7 @@ public final class WordIndexGeneratorMenu {
         ____________________________________
         2. Parse ebook, print index to file
         ____________________________________
-        3. Search page number by word
+        3. Search definition by word
         ____________________________________
         4. Exit
         
@@ -50,30 +53,24 @@ public final class WordIndexGeneratorMenu {
     }
 
     public void start() throws Exception{
-        loadIgnoreWords();
-        loadDefinitions();
+        initialize();
+        runMenuLoop();
+    }
 
+    public void initialize() throws Exception {
+        indexGenerator.loadIgnoreWords();
+        indexGenerator.loadDefinitions();
         print();
+    }
+
+    public void runMenuLoop() throws IOException {
         while (keepRunning){
             int option = scanner.nextInt();
             handleOption(option);
-
         }
     }
 
-    public void loadIgnoreWords() throws IOException {
-        ignoreWords = IgnoreWordsLoader.load();
-    }
-
-    public void loadDefinitions() throws Exception {
-        Reader reader = new BufferedReader(new InputStreamReader(
-                DefinitionsLoader.class.getResourceAsStream("/templates/dictionary.csv")
-        ));
-        definitions = DefinitionsLoader.load(reader);
-    }
-
     public Map<String, Word> generateIndex(Path bookPath) throws IOException {
-        GenerateIndex indexGenerator = new GenerateIndex(ignoreWords, definitions);
         return indexGenerator.generateIndex(bookPath);
     }
 
@@ -96,14 +93,24 @@ public final class WordIndexGeneratorMenu {
     public void saveIndex() throws IOException{
         LOGGER.info("Saving index");
         Path bookPath = getBookPath();
-        saveIndexToFile(generateIndex(bookPath), bookPath);
+        getBookIndexForSave(bookPath);
+    }
+
+    public void getBookIndexForSave(Path bookPath) throws IOException {
+        Map<String, Word> bookIndex = generateIndex(bookPath);
+        saveIndexToFile(bookIndex, bookPath);
     }
 
     public void searchIndex() throws IOException{
         LOGGER.info("searching index");
         Path bookPath = getBookPath();
         String word = getWord();
-        searchIndexForWord(generateIndex(bookPath), word);
+        getBookIndexForSearch(bookPath, word);
+    }
+
+    public void getBookIndexForSearch(Path bookPath, String word) throws IOException {
+        Map<String, Word> bookIndex = generateIndex(bookPath);
+        searchIndexForWord(bookIndex, word);
     }
 
     public List<Path> listBooks(Path library) throws IOException {
