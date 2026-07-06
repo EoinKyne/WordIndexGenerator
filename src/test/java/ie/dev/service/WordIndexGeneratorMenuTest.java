@@ -102,7 +102,7 @@ public class WordIndexGeneratorMenuTest {
         assertTrue(output.toString().contains("Invalid option"));
     }
 
-    
+
     @Test
     void shouldReturnTheBookPath() throws IOException {
         InputStream originalIn = System.in;
