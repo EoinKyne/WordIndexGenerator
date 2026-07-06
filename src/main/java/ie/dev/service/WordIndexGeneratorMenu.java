@@ -1,18 +1,14 @@
 package ie.dev.service;
 
 import ie.dev.model.Word;
-import ie.dev.utils.DefinitionsLoader;
-import ie.dev.utils.IgnoreWordsLoader;
+import ie.dev.utils.BookIndexOutputter;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -24,8 +20,6 @@ public final class WordIndexGeneratorMenu {
 
     private Path libraryPath = Path.of("library");
 
-    private Set<String> ignoreWords;
-    private Map<String, List<String>> definitions;
     private final GenerateIndex indexGenerator;
 
 
@@ -53,28 +47,39 @@ public final class WordIndexGeneratorMenu {
     }
 
     public void start() throws Exception{
+        LOGGER.debug("Starting Word index generator menu...");
         initialize();
         runMenuLoop();
     }
 
     public void initialize() throws Exception {
+        LOGGER.debug("Initializing, loading ignore words and definitions...");
         indexGenerator.loadIgnoreWords();
         indexGenerator.loadDefinitions();
-        print();
     }
 
-    public void runMenuLoop() throws IOException {
+    public void runMenuLoop() throws Exception, IOException, InputMismatchException{
+        LOGGER.debug("Running menu loop...");
         while (keepRunning){
-            int option = scanner.nextInt();
-            handleOption(option);
-        }
+            print();
+            try{
+               int option = scanner.nextInt();
+               handleOption(option);
+            }catch (InputMismatchException e){
+               LOGGER.error("Invalid input, please enter a number between 1 and 4");
+               System.out.println("Invalid input, please enter a number between 1 and 4");
+               scanner.nextLine(); // clear the invalid input
+           }
+       }
     }
 
     public Map<String, Word> generateIndex(Path bookPath) throws IOException {
+        LOGGER.debug("Generating index for book...");
         return indexGenerator.generateIndex(bookPath);
     }
 
-    public void handleOption(int option) throws IOException{
+    public void handleOption(int option) throws IOException {
+        LOGGER.debug("Handling option...");
         switch (option){
             case 1 -> printIndex();
             case 2 -> saveIndex();
@@ -85,18 +90,16 @@ public final class WordIndexGeneratorMenu {
     }
 
     public void printIndex() throws IOException {
-        LOGGER.info("print index");
+        LOGGER.debug("Get book and ");
         Path bookPath = getBookPath();
-        printIndexToConsole(generateIndex(bookPath));
+        Map<String, Word> bookIndex = generateIndex(bookPath);
+        printIndexToConsole(bookIndex);
     }
+
 
     public void saveIndex() throws IOException{
         LOGGER.info("Saving index");
         Path bookPath = getBookPath();
-        getBookIndexForSave(bookPath);
-    }
-
-    public void getBookIndexForSave(Path bookPath) throws IOException {
         Map<String, Word> bookIndex = generateIndex(bookPath);
         saveIndexToFile(bookIndex, bookPath);
     }
@@ -105,10 +108,6 @@ public final class WordIndexGeneratorMenu {
         LOGGER.info("searching index");
         Path bookPath = getBookPath();
         String word = getWord();
-        getBookIndexForSearch(bookPath, word);
-    }
-
-    public void getBookIndexForSearch(Path bookPath, String word) throws IOException {
         Map<String, Word> bookIndex = generateIndex(bookPath);
         searchIndexForWord(bookIndex, word);
     }
@@ -133,32 +132,14 @@ public final class WordIndexGeneratorMenu {
     }
     public void printIndexToConsole(Map<String, Word> bookIndex){
         LOGGER.info("Printing index to console...");
-        for (Map.Entry<String, Word> entry : bookIndex.entrySet()) {
-            System.out.println(entry.getKey() + "\n" + entry.getValue());
-        }
+        BookIndexOutputter printToConsole = new BookIndexOutputter();
+        printToConsole.printToConsole(bookIndex);
     }
 
     public void saveIndexToFile(Map<String, Word> bookIndex, Path bookPath) throws IOException {
         LOGGER.info("Saving index to file...");
-        //Path inputPath = Path.of(bookPath);
-        Path outputFile = Path.of("output",bookPath.getFileName().toString().replace(".txt", "_index.txt"));
-
-        try(BufferedWriter writer = Files.newBufferedWriter(outputFile))
-            {
-            writer.write("Word\t\t\tDetails");
-            writer.newLine();
-
-            for(Map.Entry<String, Word> entry : bookIndex.entrySet()){
-                writer.write("""
-                                     %-15s Definition%n\t\t\t\t%s%n\t\t\t\tPage Nos %s%n"""
-                                     .formatted(
-                                             entry.getKey(),
-                                             entry.getValue().definitions(),
-                                             entry.getValue().pageNumbers()));
-            }
-
-        }
-        LOGGER.info("\nIndex saved to file: {}", outputFile.toAbsolutePath());
+        BookIndexOutputter bookIndexOutputter = new BookIndexOutputter();
+        bookIndexOutputter.saveToFile(bookIndex, bookPath);
     }
 
     public void searchIndexForWord(Map<String, Word> bookIndex, String word){
@@ -169,14 +150,8 @@ public final class WordIndexGeneratorMenu {
             System.out.println("Your word is not in the index");
             return;
         }
-        System.out.println("Word\t\t\t\tDetails");
-        System.out.printf(
-                "%-15s Definition%n\t\t\t\t%s%n\t\t\t\tPage Nos %s%n",
-                word,
-                entry.definitions(),
-                entry.pageNumbers()
-        );
-
+        BookIndexOutputter printToConsole = new BookIndexOutputter();
+        printToConsole.printToConsole(Map.of(word, entry));
     }
 
     public String getWord(){
