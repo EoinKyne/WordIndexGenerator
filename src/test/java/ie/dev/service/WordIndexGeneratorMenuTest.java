@@ -11,10 +11,7 @@ import org.mockito.Mock;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -92,6 +89,20 @@ public class WordIndexGeneratorMenuTest {
         int option = 4;
         wordIndexGeneratorMenu.handleOption(option);
         assertFalse(wordIndexGeneratorMenu.isRunning());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInvalidType() throws Exception {
+        InputStream originalIn = System.in;
+        try {
+            String option = "invalid\n4\n";
+            System.setIn(new ByteArrayInputStream(option.getBytes()));
+            WordIndexGeneratorMenu menu = new WordIndexGeneratorMenu(new Scanner(System.in), new GenerateIndex());
+            assertDoesNotThrow(menu::runMenuLoop);
+
+        } finally {
+            System.setIn(originalIn);
+        }
     }
 
     @Test
