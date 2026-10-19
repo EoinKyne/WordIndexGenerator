@@ -21,6 +21,7 @@ public class Runner {
             LOGGER.error("IOException occurred: {}", e);
         }catch (Exception e){
             LOGGER.error("Exception occurred: {}", e);
+
         }
     }
 }
